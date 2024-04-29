@@ -31,19 +31,12 @@ class rpict extends eqLogic
 
     public static function changeLogLive($level)
     {
-        $activation_Modem = (config::byKey('activation_Modem', 'teleinfo') == "") ? 1 : config::byKey('activation_Modem', 'teleinfo');
-        if ($activation_Modem == '0') {
-            log::add('teleinfo', 'info', 'pas d envoi de message faute de configuration');
-            return false;
-        }
         sleep(1); // attend que le level ait eu le temps de s'écrire dans la bdd
         $value['cmd'] = 'changelog';
-        $value['level'] = log::convertLogLevel(log::getLogLevel('teleinfo'));
+        $value['level'] = log::convertLogLevel(log::getLogLevel('rpict'));
         $socketport = config::byKey('socketport', __CLASS__, '55062');
         $value['apikey'] = jeedom::getApiKey(__CLASS__);
-        if ($activation_Modem == 1) {
-            self::sendToDaemon($value, 'serial', $socketport);
-        }
+        self::sendToDaemon($value, 'serial', $socketport);
     }
 
     public static function sendToDaemon($params, $mode, $socketport)
@@ -52,10 +45,10 @@ class rpict extends eqLogic
         if ($deamon_info['state'] != 'ok') {
             throw new Exception("Le démon " . $mode . " n'est pas démarré");
         }
-        $params['apikey'] = jeedom::getApiKey('teleinfo');
+        $params['apikey'] = jeedom::getApiKey('rpict');
         $payLoad = json_encode($params);
         $socket = socket_create(AF_INET, SOCK_STREAM, 0);
-        socket_connect($socket, config::byKey('sockethost', 'teleinfo', '127.0.0.1'), $socketport);
+        socket_connect($socket, config::byKey('sockethost', 'rpict', '127.0.0.1'), $socketport);
         socket_write($socket, $payLoad, strlen($payLoad));
         socket_close($socket);
         return true;
@@ -68,7 +61,7 @@ class rpict extends eqLogic
      */
     public static function isBeta($text = false)
     {
-        $plugin = plugin::byId('teleinfo');
+        $plugin = plugin::byId('rpict');
         $update = $plugin->getUpdate();
         $isBeta = false;
         if (is_object($update)) {
@@ -112,7 +105,7 @@ class rpict extends eqLogic
     public static function createCmdFromDef($oNId, $oKey, $oValue)
     {
         if (!isset($oKey) || !isset($oNId)) {
-            log::add('teleinfo', 'error', '[RPICT]-----Information manquante pour ajouter l\'équipement : ' . print_r($oKey, true) . ' ' . print_r($oNId, true));
+            log::add('rpict', 'error', '[RPICT]-----Information manquante pour ajouter l\'équipement : ' . print_r($oKey, true) . ' ' . print_r($oNId, true));
             return false;
         }
         $rpict = rpict::byLogicalId($oNId, 'rpict');
@@ -146,11 +139,6 @@ class rpict extends eqLogic
     public static function runDeamon($debug = false)
     {
         $rpictPath = realpath(dirname(__FILE__) . '/../../ressources');
-        $activation_Modem = (config::byKey('activation_Modem', 'teleinfo') == "") ? 1 : config::byKey('activation_Modem', 'teleinfo');
-        if ($activation_Modem == '') {
-            $activation_Modem = 1;
-            log::add('rpict', 'info', '---------- Activation Modem 1---------');
-        }
         log::add('rpict', 'info', 'Démarrage daemon ');
 
         log::add('rpict', 'info', 'Démarrage compteur ');
@@ -171,7 +159,7 @@ class rpict extends eqLogic
 
         exec('sudo chmod 777 ' . $port . ' > /dev/null 2>&1');
 
-        log::add('teleinfo', 'info', '---------- Informations de lancement ---------');
+        log::add('rpict', 'info', '---------- Informations de lancement ---------');
         log::add('rpict', 'info', 'Port modem : ' . $port);
         log::add('rpict', 'info', 'Socket : ' . $socketPort);
         log::add('rpict', 'info', '---------------------------------------------');
@@ -251,8 +239,8 @@ class rpict extends eqLogic
             $return['state'] = 'nok';
             $return['deamon_modem'] = $returnmodem;
         }
-        log::add('teleinfo', 'debug', '[TELEINFO_deamon_modem] état : ' . $returnmodem);
-        log::add('teleinfo', 'debug', '[TELEINFO_deamon] état global => retour: ' . $return['state']);
+        log::add('rpict', 'debug', '[RPICT_deamon_modem] état : ' . $returnmodem);
+        log::add('rpict', 'debug', '[RPICT_deamon] état global => retour: ' . $return['state']);
         return $return;
     }
 

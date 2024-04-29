@@ -1,6 +1,6 @@
-# post-install script for Jeedom plugin teleinfo
+# post-install script for Jeedom plugin rpict
 #!/bin/bash
-PROGRESS_FILE=/tmp/jeedom_install_in_progress_teleinfo
+PROGRESS_FILE=/tmp/jeedom_install_in_progress_rpict
 if [ ! -z $1 ]; then
     PROGRESS_FILE=$1
 fi
@@ -10,7 +10,7 @@ echo 0 > ${PROGRESS_FILE}
 echo "**********************************"
 echo "*  Installation des dépendances  *"
 echo "**********************************"
-BASEDIR=/var/www/html/plugins/teleinfo/ressources
+BASEDIR=/var/www/html/plugins/rpict/ressources
 
 echo 5 > ${PROGRESS_FILE}
 sudo apt-get update

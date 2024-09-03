@@ -14,7 +14,7 @@ import sys
 from optparse import OptionParser
 from datetime import datetime
 import subprocess
-import urllib2
+from urllib.request import urlopen
 import threading
 import signal
 
@@ -132,7 +132,7 @@ class Rpict:
             self._log.info("Rpict link successfully closed")
 
     def terminate(self):
-        print "Terminating..."
+        print ("Terminating...")
         self.close()
         os.remove("/tmp/rpict.pid")
         sys.exit()
@@ -140,7 +140,7 @@ class Rpict:
     def run(self):
         """ Main function
         """
-        print "Starting deamon..."
+        print ("Starting deamon...")
         data = {}
         data_temp = {}
         separateur = " "
@@ -168,7 +168,7 @@ class Rpict:
         try:
             self.open()
         except RpictException as err:
-            print "Error opening serial"
+            print ("Error opening serial")
             self._log.error(err.value)
             self.terminate()
             return
@@ -184,7 +184,7 @@ class Rpict:
             for value in data_temp:
                 x += 1
                 cle="ch" + str(x)
-                data[cle] = str(value)
+                data[cle] = str(value).strip()
             #print(data)
 
             self.cmd = 'nice -n 19 timeout 8 /usr/bin/php ' + self._realpath + '/../php/jeeRpict.php api=' + self._cleApi
@@ -203,7 +203,7 @@ class Rpict:
                         self.timer = threading.Timer(int(10), timer_callback)
                         self.timer.start()
                         thread.start()
-                    except Exception, e:
+                    except Exception as e:
                         errorCom = "Connection error '%s'" % e
                 if (global_sleep != 0):
                         self._log.debug("start sleeping " + str(global_sleep) + " seconds")
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     if options.logpath:
         try:
             global_logfile = os.path.realpath(options.logpath) + '/rpict_deamon'
-            print "loggile : " + global_logfile
+            print ("loggile : " + global_logfile)
         except:
             error = "Can not get logptah %s" % options.logpath
             raise RpictException(error)
@@ -279,10 +279,11 @@ if __name__ == "__main__":
             error = "Can not get sleep %s" % options.sleep
             raise RpictException(error)
     if global_can_start == 'true':
-        print "Init deamon ..."
+        print ("Init deamon ...")
         pid = str(os.getpid())
-        file("/tmp/rpict.pid", 'w').write("%s\n" % pid)
-        print "pidfile : " + "/tmp/rpict.pid"
+        with open('/tmp/rpict.pid', 'w') as fileHandle:
+        	fileHandle.write("%s\n" % pid)
+        print ("pidfile : " + "/tmp/rpict.pid")
         rpict = Rpict(global_device_name, global_api, global_real_path, global_vitesse)
         signal.signal(signal.SIGTERM, rpict.exit_handler)
         signal.signal(signal.SIGINT, rpict.exit_handler)
